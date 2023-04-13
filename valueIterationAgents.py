@@ -56,12 +56,13 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.mdp = mdp
         self.discount = discount
         self.iterations = iterations
-        self.values = util.Counter() # A Counter is a dict with default 0
+        self.values = util.Counter()  # A Counter is a dict with default 0
         self.runValueIteration()
 
     def runValueIteration(self):
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
+
 
 
     def getValue(self, state):
@@ -77,6 +78,17 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
+
+        q_val = 0
+
+        state_action_pairs = mdp.getTransitionStatesAndProbs(state, action)
+
+        for (st, prob) in state_action_pairs:
+            q_val += prob * self.getValue(st)
+
+        return q_val
+
+
         util.raiseNotDefined()
 
     def computeActionFromValues(self, state):
