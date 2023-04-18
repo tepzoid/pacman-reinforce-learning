@@ -242,3 +242,37 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
     def runValueIteration(self):
         "*** YOUR CODE HERE ***"
 
+        # Create a dictionary to hold predecessors of states
+        predec = {}
+
+        states = self.mdp.getStates()
+
+        # Compute predecessors of all states
+        for st in states:
+            actions = self.mdp.getPossibleActions(st)
+
+            for act in actions:     # All possible actions at state st
+                stateProb = self.mdp.getTransitionStatesAndProbs(st, act)
+
+                for pair in stateProb:      # All possible next actions at state_action pair (st, act)
+                    # If the probability is not 0
+                    if pair[1] != 0:
+
+                        # If the dictionary already contains state pair[0]
+                        # Update the predec \dictionary\ content, add another predecessor state st
+
+                        # print('pair[0] is ', pair[0], ' keys are ', predec.keys())
+                        if pair[0] in predec.keys():
+
+                            og_content = predec[pair[0]]
+
+                            # print('og content is ', og_content)
+
+                            predec[pair[0]] = og_content.union({st})    # og_content should be of type SET
+                        else:
+                            predec[pair[0]] = {st}
+
+                        # print('we assigned predec[pair[0]] with ', predec[pair[0]])
+
+
+
