@@ -63,6 +63,36 @@ class ValueIterationAgent(ValueEstimationAgent):
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
 
+        state_list = self.mdp.getStates()
+
+        # Start Value Iteration algorithm
+        for i in range(self.iterations):
+
+            temp_counter = util.Counter(self.values)
+
+            # Go through all states
+            for state in state_list:
+
+                # print('start state ', state)
+
+                actions = self.mdp.getPossibleActions(state)
+
+                # Find the maximum Q-value for the state
+                max_Qvalue = float("-inf")
+
+                # If the state is the terminal state, no more future rewards
+                if self.mdp.isTerminal(state):
+                    continue
+                else:
+                    for act in actions:
+                        temp_Qvalue = self.computeQValueFromValues(state, act)
+
+                        if temp_Qvalue > max_Qvalue:
+                            max_Qvalue = temp_Qvalue
+
+                temp_counter[state] = max_Qvalue
+
+            self.values = temp_counter
 
 
     def getValue(self, state):
@@ -81,13 +111,17 @@ class ValueIterationAgent(ValueEstimationAgent):
 
         q_val = 0
 
-        state_action_pairs = mdp.getTransitionStatesAndProbs(state, action)
+        state_action_pairs = self.mdp.getTransitionStatesAndProbs(state, action)
 
-        for (st, prob) in state_action_pairs:
-            q_val += prob * self.getValue(st)
+        for pair in state_action_pairs:
+
+            q_val += pair[1] * (self.mdp.getReward(state, action, pair[0]) + self.discount * self.getValue(pair[0]))
+
+        # print('current state is ', state, ' with action ', action)
+        # print('Q value is ', q_val)
+
 
         return q_val
-
 
         util.raiseNotDefined()
 
@@ -101,6 +135,18 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
+
+        if self.mdp.isTerminal(state):
+            return None
+
+        actions_list = self.mdp.getPossibleActions(state)
+
+        vals = util.Counter()
+        for act in actions_list:
+            vals[act] = self.getQValue(state, act)
+
+        return vals.argMax()
+
         util.raiseNotDefined()
 
     def getPolicy(self, state):
