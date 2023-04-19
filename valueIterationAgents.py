@@ -120,7 +120,6 @@ class ValueIterationAgent(ValueEstimationAgent):
         # print('current state is ', state, ' with action ', action)
         # print('Q value is ', q_val)
 
-
         return q_val
 
         util.raiseNotDefined()
@@ -242,14 +241,29 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
     def runValueIteration(self):
         "*** YOUR CODE HERE ***"
 
-        # Create a dictionary to hold predecessors of states
-        predec = {}
+        predec = {}     # Create a dictionary to hold predecessors of states
+        pq = util.PriorityQueue()      # Empty Priority Queue
+        correct_val = util.Counter()
 
         states = self.mdp.getStates()
 
         # Compute predecessors of all states
         for st in states:
             actions = self.mdp.getPossibleActions(st)
+
+            if not self.mdp.isTerminal(st):
+
+                cur_val = self.values[st]
+                # Get max value from all Q-values of st's possible actions
+                max_val = -999999
+                for a in actions:
+                    if self.getQValue(st, a) > max_val:
+                        max_val = self.getQValue(st, a)
+
+                correct_val[st] = max_val   # Store the value st should be updated to
+                diff = abs(max_val - cur_val)
+
+                pq.push(st, -diff)
 
             for act in actions:     # All possible actions at state st
                 stateProb = self.mdp.getTransitionStatesAndProbs(st, act)
@@ -273,6 +287,30 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
                             predec[pair[0]] = {st}
 
                         # print('we assigned predec[pair[0]] with ', predec[pair[0]])
+
+        for i in range(self.iterations):
+
+            if pq.isEmpty():
+                break
+
+            state = pq.pop()
+
+            if not self.mdp.isTerminal(state):
+                self.values[state] = correct_val[state]
+
+            # Get predecessors of state
+            predecessors = predec[state]
+
+            for p in predecessors:
+
+
+
+                diff = abs(self.values[p] - correct_val[p])
+
+
+                if diff > self.theta:
+                    pq.push(p, -diff)
+
 
 
 
