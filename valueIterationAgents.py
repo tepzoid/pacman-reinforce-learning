@@ -260,7 +260,7 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
                     if self.getQValue(st, a) > max_val:
                         max_val = self.getQValue(st, a)
 
-                correct_val[st] = max_val   # Store the value st should be updated to
+
                 diff = abs(max_val - cur_val)
 
                 pq.push(st, -diff)
@@ -275,8 +275,7 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
                         # If the dictionary already contains state pair[0]
                         # Update the predec \dictionary\ content, add another predecessor state st
 
-                        # print('pair[0] is ', pair[0], ' keys are ', predec.keys())
-                        if pair[0] in predec.keys():
+                        if pair[0] in predec:
 
                             og_content = predec[pair[0]]
 
@@ -296,7 +295,14 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
             state = pq.pop()
 
             if not self.mdp.isTerminal(state):
-                self.values[state] = correct_val[state]
+
+                actions = self.mdp.getPossibleActions(state)
+                max_val = -999999
+                for a in actions:
+                    if self.getQValue(state, a) > max_val:
+                        max_val = self.getQValue(state, a)
+
+                self.values[state] = max_val
 
             # Get predecessors of state
             predecessors = predec[state]
@@ -304,9 +310,13 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
             for p in predecessors:
 
 
+                actions = self.mdp.getPossibleActions(p)
+                max_val = -999999
+                for a in actions:
+                    if self.getQValue(p, a) > max_val:
+                        max_val = self.getQValue(p, a)
 
-                diff = abs(self.values[p] - correct_val[p])
-
+                diff = abs(self.values[p] - max_val)
 
                 if diff > self.theta:
                     pq.push(p, -diff)
