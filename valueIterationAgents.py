@@ -251,20 +251,6 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
         for st in states:
             actions = self.mdp.getPossibleActions(st)
 
-            if not self.mdp.isTerminal(st):
-
-                cur_val = self.values[st]
-                # Get max value from all Q-values of st's possible actions
-                max_val = -999999
-                for a in actions:
-                    if self.getQValue(st, a) > max_val:
-                        max_val = self.getQValue(st, a)
-
-
-                diff = abs(max_val - cur_val)
-
-                pq.push(st, -diff)
-
             for act in actions:     # All possible actions at state st
                 stateProb = self.mdp.getTransitionStatesAndProbs(st, act)
 
@@ -287,28 +273,43 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
 
                         # print('we assigned predec[pair[0]] with ', predec[pair[0]])
 
+        # Push all states in PQ for the first time
+        for s in states:
+            actions = self.mdp.getPossibleActions(s)
+            if not self.mdp.isTerminal(s):
+
+                cur_val = self.values[s]
+                # Get max value from all Q-values of st's possible actions
+                max_val = -999999
+                for a in actions:
+                    if self.getQValue(s, a) > max_val:
+                        max_val = self.getQValue(s, a)
+
+                diff = abs(max_val - cur_val)
+
+                pq.push(s, -diff)
+
         for i in range(self.iterations):
 
             if pq.isEmpty():
                 break
 
-            state = pq.pop()
+            state1 = pq.pop()
 
-            if not self.mdp.isTerminal(state):
+            if not self.mdp.isTerminal(state1):
 
-                actions = self.mdp.getPossibleActions(state)
+                actions = self.mdp.getPossibleActions(state1)
                 max_val = -999999
                 for a in actions:
-                    if self.getQValue(state, a) > max_val:
-                        max_val = self.getQValue(state, a)
+                    if self.getQValue(state1, a) > max_val:
+                        max_val = self.getQValue(state1, a)
 
-                self.values[state] = max_val
+                self.values[state1] = max_val
 
             # Get predecessors of state
-            predecessors = predec[state]
+            predecessors = predec[state1]
 
             for p in predecessors:
-
 
                 actions = self.mdp.getPossibleActions(p)
                 max_val = -999999
@@ -318,8 +319,14 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
 
                 diff = abs(self.values[p] - max_val)
 
+                # Check if diff is larger than the threshold theta
                 if diff > self.theta:
-                    pq.push(p, -diff)
+                    # push p into the priority queue as long as it
+                    # does not already exist in the priority queue with equal or lower priority
+                    pq.update(p, -diff)
+
+
+
 
 
 
