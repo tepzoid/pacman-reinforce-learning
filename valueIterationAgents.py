@@ -271,7 +271,6 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
                         else:
                             predec[pair[0]] = {st}
 
-                        # print('we assigned predec[pair[0]] with ', predec[pair[0]])
 
         # Push all states in PQ for the first time
         for s in states:
@@ -289,6 +288,7 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
 
                 pq.push(s, -diff)
 
+        # Run the algorithm for -iteration- iterations
         for i in range(self.iterations):
 
             if pq.isEmpty():
