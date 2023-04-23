@@ -238,7 +238,10 @@ class ApproximateQAgent(PacmanQAgent):
 
         ftVector = self.featExtractor.getFeatures(state, action)
 
-        self.weights[(state, action)] = self.weights[(state, action)] + self.alpha * diff * ftVector[(state, action)]
+        # self.weights[(state, action)] = self.weights[(state, action)] + self.alpha * diff * ftVector[(state, action)]
+        for ft in ftVector:
+            self.weights[ft] = self.weights[ft] + self.alpha * diff * ftVector[ft]
+
 
 
     def final(self, state):
